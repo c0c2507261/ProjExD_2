@@ -82,7 +82,7 @@ def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
 
 
 def calc_orientation(org: pg.Rect, dst: pg.Rect,
-                     current_xy: tuple[float, float]) -> tuple[float, float]:
+                    current_xy: tuple[float, float]) -> tuple[float, float]:
     """
     爆弾から見て、こうかとんRectがある方向を計算し、正規化したベクトルを返す
     引数1 org：爆弾Rect（始点）
@@ -113,6 +113,11 @@ def check_bound(obj_rct: pg.Rect) -> tuple[bool, bool]:
 
 
 def main():
+    """
+    「逃げろ！こうかとん」のメイン関数
+    こうかとんを矢印キーで操作し、追従してくる爆弾から逃げ続ける
+    爆弾と衝突したらゲームオーバー画面を表示して終了する
+    """
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
     bg_img = pg.image.load("fig/pg_bg.jpg")
@@ -158,8 +163,9 @@ def main():
         avx = vx * bb_accs[idx]
         avy = vy * bb_accs[idx]
         bb_img = bb_imgs[idx]
-        bb_rct.width = bb_img.get_rect().width
-        bb_rct.height = bb_img.get_rect().height
+        center = bb_rct.center
+        bb_rct = bb_img.get_rect()
+        bb_rct.center = center
 
         bb_rct.move_ip(avx, avy)
         yoko, tate = check_bound(bb_rct)
