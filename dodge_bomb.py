@@ -1,3 +1,4 @@
+import math
 import os
 import random
 import sys
@@ -80,6 +81,23 @@ def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
     return bb_imgs, bb_accs
 
 
+def calc_orientation(org: pg.Rect, dst: pg.Rect,
+                     current_xy: tuple[float, float]) -> tuple[float, float]:
+    """
+    爆弾から見て、こうかとんRectがある方向を計算し、正規化したベクトルを返す
+    引数1 org：爆弾Rect（始点）
+    引数2 dst：こうかとんRect（終点）
+    引数3 current_xy：計算前の方向ベクトル
+    戻り値：正規化された方向ベクトル（vx, vy）／距離が近い場合はcurrent_xy
+    """
+    x_diff = dst.centerx - org.centerx
+    y_diff = dst.centery - org.centery
+    norm = math.sqrt(x_diff ** 2 + y_diff ** 2)
+    if norm < 300:
+        return current_xy
+    return x_diff / norm * math.sqrt(50), y_diff / norm * math.sqrt(50)
+
+
 def check_bound(obj_rct: pg.Rect) -> tuple[bool, bool]:
     """
     引数：こうかとんRectか爆弾Rect
@@ -135,6 +153,7 @@ def main():
             kk_img = kk_imgs[tuple(sum_mv)]
         screen.blit(kk_img, kk_rct)
 
+        vx, vy = calc_orientation(bb_rct, kk_rct, (vx, vy))
         idx = min(tmr // 500, 9)
         avx = vx * bb_accs[idx]
         avy = vy * bb_accs[idx]
