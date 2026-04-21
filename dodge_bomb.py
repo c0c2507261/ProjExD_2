@@ -1,6 +1,8 @@
 import os
 import random
 import sys
+import time
+
 import pygame as pg
 
 
@@ -12,6 +14,35 @@ DELTA = {
     pg.K_RIGHT: (+5, 0),
 }
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+
+def gameover(screen: pg.Surface) -> None:
+    """
+    こうかとんが爆弾に衝突したときのゲームオーバー画面を表示する
+    画面をブラックアウトし、泣いているこうかとんと「Game Over」を5秒間表示する
+    引数：スクリーンSurface
+    """
+    blackout = pg.Surface((WIDTH, HEIGHT))
+    pg.draw.rect(blackout, (0, 0, 0), pg.Rect(0, 0, WIDTH, HEIGHT))
+    blackout.set_alpha(200)
+
+    cry_img = pg.transform.rotozoom(pg.image.load("fig/8.png"), 0, 0.9)
+    cry_rct = cry_img.get_rect()
+
+    fonto = pg.font.Font(None, 80)
+    txt = fonto.render("Game Over", True, (255, 255, 255))
+    txt_rct = txt.get_rect()
+
+    blackout.blit(txt, [WIDTH / 2 - txt_rct.width / 2,
+                        HEIGHT / 2 - txt_rct.height / 2])
+    blackout.blit(cry_img, [WIDTH / 2 - txt_rct.width / 2 - cry_rct.width,
+                            HEIGHT / 2 - cry_rct.height / 2])
+    blackout.blit(cry_img, [WIDTH / 2 + txt_rct.width / 2,
+                            HEIGHT / 2 - cry_rct.height / 2])
+
+    screen.blit(blackout, [0, 0])
+    pg.display.update()
+    time.sleep(5)
 
 
 def check_bound(obj_rct: pg.Rect) -> tuple[bool, bool]:
@@ -53,6 +84,7 @@ def main():
         screen.blit(bg_img, [0, 0])
 
         if kk_rct.colliderect(bb_rct):
+            gameover(screen)
             return
 
         key_lst = pg.key.get_pressed()
